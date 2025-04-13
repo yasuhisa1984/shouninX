@@ -1,11 +1,9 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 
-
-
-export default function Index() {
-  return (function MainComponent({ children }) {
+export default function MainLayout({ children }) {
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
+  const [openSubMenu, setOpenSubMenu] = useState(null);
 
   const menuItems = [
     { icon: "fa-home", text: "ホーム", href: "/" },
@@ -24,8 +22,6 @@ export default function Index() {
       ],
     },
   ];
-
-  const [openSubMenu, setOpenSubMenu] = useState(null);
 
   const handleMenuClick = (item) => {
     if (item.subItems) {
@@ -50,18 +46,10 @@ export default function Index() {
             </h1>
           </div>
           <div className="flex items-center space-x-4">
-            <a
-              href="/notifications"
-              className="text-gray-500 hover:text-gray-700"
-              aria-label="通知"
-            >
+            <a href="/notifications" className="text-gray-500 hover:text-gray-700" aria-label="通知">
               <i className="fas fa-bell text-xl"></i>
             </a>
-            <a
-              href="/settings/profile"
-              className="text-gray-500 hover:text-gray-700"
-              aria-label="プロフィール"
-            >
+            <a href="/settings/profile" className="text-gray-500 hover:text-gray-700" aria-label="プロフィール">
               <i className="fas fa-user-circle text-xl"></i>
             </a>
           </div>
@@ -88,18 +76,13 @@ export default function Index() {
                           <i className={`fas ${item.icon} w-5`}></i>
                           <span>{item.text}</span>
                         </div>
-                        <i
-                          className={`fas fa-chevron-${openSubMenu === item.text ? "up" : "down"}`}
-                        ></i>
+                        <i className={`fas fa-chevron-${openSubMenu === item.text ? "up" : "down"}`}></i>
                       </button>
                       {openSubMenu === item.text && (
                         <ul className="ml-8 mt-2 space-y-2">
                           {item.subItems.map((subItem) => (
                             <li key={subItem.text}>
-                              <a
-                                href={subItem.href}
-                                className="block px-4 py-2 text-gray-600 rounded-lg hover:bg-gray-100"
-                              >
+                              <a href={subItem.href} className="block px-4 py-2 text-gray-600 rounded-lg hover:bg-gray-100">
                                 {subItem.text}
                               </a>
                             </li>
@@ -108,10 +91,7 @@ export default function Index() {
                       )}
                     </div>
                   ) : (
-                    <a
-                      href={item.href}
-                      className="flex items-center space-x-3 px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100"
-                    >
+                    <a href={item.href} className="flex items-center space-x-3 px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100">
                       <i className={`fas ${item.icon} w-5`}></i>
                       <span>{item.text}</span>
                     </a>
@@ -134,49 +114,4 @@ export default function Index() {
       </div>
     </div>
   );
-}
-
-function StoryComponent() {
-  return (
-    <div>
-      <MainComponent>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-2xl font-bold mb-4">サンプルコンテンツ</h2>
-          <p className="text-gray-600">
-            これはレイアウトコンポーネントのサンプル表示です。実際のコンテンツはchildrenとして渡されます。
-          </p>
-        </div>
-      </MainComponent>
-
-      <MainComponent>
-        <div className="grid gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-bold mb-4">データ一覧</h2>
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-2">ID</th>
-                  <th className="text-left py-2">名前</th>
-                  <th className="text-left py-2">状態</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b">
-                  <td className="py-2">001</td>
-                  <td className="py-2">サンプルデータ1</td>
-                  <td className="py-2">処理中</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-2">002</td>
-                  <td className="py-2">サンプルデータ2</td>
-                  <td className="py-2">完了</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </MainComponent>
-    </div>
-  );
-});
 }

@@ -232,5 +232,4 @@ function MainComponent() {
   );
 }
 
-export default MainComponent;"use client";
-
+export default MainComponent;
