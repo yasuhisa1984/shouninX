@@ -15,7 +15,7 @@ export default function MainLayout({ children }) {
 
   const menuItems = [
     { path: "/", label: "ダッシュボード", icon: "fa-home" },
-    { path: "/requests", label: "申請一覧", icon: "fa-list" },
+    { path: "/request", label: "申請一覧", icon: "fa-list" },
     { path: "/forms", label: "フォーム管理", icon: "fa-file-alt" },
     { path: "/ocr/documents", label: "OCR管理", icon: "fa-file-image" },
     { path: "/settings/approvals", label: "承認設定", icon: "fa-check-circle" },

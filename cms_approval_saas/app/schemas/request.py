@@ -15,6 +15,7 @@ class RequestOut(BaseModel):
     form_id: str
     data_json: str
     created_at: datetime
+    form_name: Optional[str] = None
 
     class Config:
         orm_mode = True

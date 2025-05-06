@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 function MainComponent() {
   const [requests, setRequests] = useState([]);
@@ -14,16 +14,13 @@ function MainComponent() {
 
   const fetchRequests = async () => {
     try {
-      const response = await fetch("/api/requests", {
-        method: "POST",
+      const response = await fetch("http://localhost:8000/requests/", {
+        method: "GET",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ method: "GET", tenantId: "t001" }),
       });
 
       if (!response.ok) {
-        throw new Error(
-          `申請一覧の取得に失敗しました [${response.status}] ${response.statusText}`
-        );
+        throw new Error(`申請一覧の取得に失敗しました [${response.status}] ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -50,8 +47,8 @@ function MainComponent() {
     };
 
     return (
-      <span className={`px-2 py-1 rounded text-sm ${statusConfig[status]}`}>
-        {statusText[status]}
+      <span className={`px-2 py-1 rounded text-sm ${statusConfig[status] || "bg-gray-100 text-gray-800"}`}>
+        {statusText[status] || "未設定"}
       </span>
     );
   };
@@ -107,10 +104,10 @@ function MainComponent() {
                   {new Date(request.created_at).toLocaleString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {request.form_name}
+                  {request.form_name || "-"}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {getStatusBadge(request.status)}
+                  {getStatusBadge(request.status || "pending")}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">
                   <button
@@ -155,7 +152,7 @@ function MainComponent() {
             <div className="space-y-4">
               <div>
                 <h3 className="font-medium text-gray-700">フォーム名</h3>
-                <p>{selectedRequest.form_name}</p>
+                <p>{selectedRequest.form_name || "-"}</p>
               </div>
 
               <div>
@@ -166,16 +163,14 @@ function MainComponent() {
               <div>
                 <h3 className="font-medium text-gray-700">ステータス</h3>
                 <div className="mt-1">
-                  {getStatusBadge(selectedRequest.status)}
+                  {getStatusBadge(selectedRequest.status || "pending")}
                 </div>
               </div>
 
               <div>
                 <h3 className="font-medium text-gray-700">申請内容</h3>
                 <div className="mt-2 space-y-2">
-                  {Object.entries(
-                    JSON.parse(selectedRequest.data_json || "{}")
-                  ).map(([key, value]) => (
+                  {Object.entries(JSON.parse(selectedRequest.data_json || "{}")).map(([key, value]) => (
                     <div key={key} className="grid grid-cols-3 gap-4">
                       <div className="font-medium text-gray-600">{key}</div>
                       <div className="col-span-2">{value}</div>
@@ -184,24 +179,15 @@ function MainComponent() {
                 </div>
               </div>
 
-              {selectedRequest.approval_steps && (
+              {Array.isArray(selectedRequest.approval_steps) && (
                 <div>
                   <h3 className="font-medium text-gray-700">承認履歴</h3>
                   <div className="mt-2 space-y-2">
                     {selectedRequest.approval_steps.map((step, index) => (
-                      <div
-                        key={index}
-                        className="border-l-2 border-gray-200 pl-4"
-                      >
-                        <div className="text-sm text-gray-600">
-                          ステップ {step.step_number}
-                        </div>
-                        <div>{getStatusBadge(step.status)}</div>
-                        {step.comment && (
-                          <div className="mt-1 text-gray-600">
-                            {step.comment}
-                          </div>
-                        )}
+                      <div key={index} className="border-l-2 border-gray-200 pl-4">
+                        <div className="text-sm text-gray-600">ステップ {step.step_number}</div>
+                        <div>{getStatusBadge(step.status || "pending")}</div>
+                        {step.comment && <div className="mt-1 text-gray-600">{step.comment}</div>}
                       </div>
                     ))}
                   </div>
@@ -216,3 +202,4 @@ function MainComponent() {
 }
 
 export default MainComponent;
+

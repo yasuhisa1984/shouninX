@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 function MainComponent() {
   const [forms, setForms] = useState([]);
@@ -26,10 +26,10 @@ function MainComponent() {
 
       const data = await response.json();
       setForms(data.forms || []);
-      setLoading(false);
     } catch (err) {
       console.error(err);
       setError("フォーム一覧の取得に失敗しました");
+    } finally {
       setLoading(false);
     }
   };
@@ -46,26 +46,14 @@ function MainComponent() {
   };
 
   const moveApprovalStep = (stepId, direction) => {
-    const stepIndex = approvalSteps.findIndex((step) => step.id === stepId);
-    if (
-      (direction === "up" && stepIndex === 0) ||
-      (direction === "down" && stepIndex === approvalSteps.length - 1)
-    )
-      return;
+    const index = approvalSteps.findIndex((step) => step.id === stepId);
+    const swapIndex = direction === "up" ? index - 1 : index + 1;
 
-    const newSteps = [...approvalSteps];
-    const temp = newSteps[stepIndex];
-    newSteps[stepIndex] = newSteps[stepIndex + (direction === "up" ? -1 : 1)];
-    newSteps[stepIndex + (direction === "up" ? -1 : 1)] = temp;
-    setApprovalSteps(newSteps);
-  };
+    if (swapIndex < 0 || swapIndex >= approvalSteps.length) return;
 
-  const updateApprovers = (stepId, approvers) => {
-    setApprovalSteps(
-      approvalSteps.map((step) =>
-        step.id === stepId ? { ...step, approvers } : step
-      )
-    );
+    const updated = [...approvalSteps];
+    [updated[index], updated[swapIndex]] = [updated[swapIndex], updated[index]];
+    setApprovalSteps(updated);
   };
 
   const saveApprovalFlow = async () => {
@@ -82,22 +70,97 @@ function MainComponent() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("承認フロー設定の保存に失敗しました");
-      }
+      if (!response.ok) throw new Error();
 
       setError(null);
-    } catch (err) {
-      console.error(err);
+      alert("保存に成功しました！");
+    } catch {
       setError("承認フロー設定の保存に失敗しました");
     }
   };
 
-  if (loading) {
-    return <></>;
-  }
+  if (loading) return <div className="p-4">読み込み中...</div>;
 
-  return <></>;
+  return (
+    <div className="p-6">
+      {error && (
+        <div className="mb-4 text-red-600 font-bold">{error}</div>
+      )}
+
+      <div className="mb-4">
+        <label className="block mb-2 font-semibold">対象フォーム選択</label>
+        <select
+          className="p-2 border rounded"
+          onChange={(e) => {
+            const selected = forms.find((f) => f.id === e.target.value);
+            setSelectedForm(selected);
+            setApprovalSteps([]); // フォーム切り替え時にリセット
+          }}
+        >
+          <option value="">フォームを選択してください</option>
+          {forms.map((form) => (
+            <option key={form.id} value={form.id}>
+              {form.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {selectedForm && (
+        <>
+          <h2 className="text-xl font-bold mb-2">承認ステップ設定</h2>
+
+          <button
+            onClick={addApprovalStep}
+            className="mb-4 px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            ステップを追加
+          </button>
+
+          <ul className="space-y-3">
+            {approvalSteps.map((step, index) => (
+              <li
+                key={step.id}
+                className="border p-3 rounded flex justify-between items-center"
+              >
+                <div>ステップ {index + 1}</div>
+                <div className="space-x-2">
+                  <button
+                    onClick={() => moveApprovalStep(step.id, "up")}
+                    className="text-sm bg-gray-200 px-2 py-1 rounded"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    onClick={() => moveApprovalStep(step.id, "down")}
+                    className="text-sm bg-gray-200 px-2 py-1 rounded"
+                  >
+                    ↓
+                  </button>
+                  <button
+                    onClick={() => removeApprovalStep(step.id)}
+                    className="text-sm bg-red-500 text-white px-2 py-1 rounded"
+                  >
+                    削除
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-6">
+            <button
+              onClick={saveApprovalFlow}
+              className="bg-green-500 text-white px-4 py-2 rounded"
+            >
+              保存する
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
 
 export default MainComponent;
+
